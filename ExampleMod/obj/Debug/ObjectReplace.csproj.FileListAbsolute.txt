@@ -1,0 +1,9 @@
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\bin\Debug\ObjectReplace.dll
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\bin\Debug\ObjectReplace.pdb
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\bin\Debug\Assembly-CSharp.dll
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\bin\Debug\coremod.dll
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\bin\Debug\UnityEngine.dll
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\obj\Debug\ObjectReplace.csprojResolveAssemblyReference.cache
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\obj\Debug\ObjectReplace.csproj.CoreCompileInputs.cache
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\obj\Debug\ObjectReplace.dll
+A:\Code\Raft Modding\ObjectReplace\ExampleMod\obj\Debug\ObjectReplace.pdb

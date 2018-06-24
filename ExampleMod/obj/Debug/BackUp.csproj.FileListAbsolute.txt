@@ -1,0 +1,9 @@
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\BackUp.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\BackUp.pdb
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\Assembly-CSharp.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\coremod.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\obj\Debug\BackUp.csprojResolveAssemblyReference.cache
+D:\Code\Raft Modding\BackUpMod\ExampleMod\obj\Debug\BackUp.csproj.CoreCompileInputs.cache
+D:\Code\Raft Modding\BackUpMod\ExampleMod\obj\Debug\BackUp.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\obj\Debug\BackUp.pdb

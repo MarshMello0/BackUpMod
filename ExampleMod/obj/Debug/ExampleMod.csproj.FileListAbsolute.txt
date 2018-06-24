@@ -1,0 +1,9 @@
+A:\Code\Raft Modding\ExampleMod\obj\Debug\ExampleMod.csprojResolveAssemblyReference.cache
+A:\Code\Raft Modding\ExampleMod\obj\Debug\ExampleMod.csproj.CoreCompileInputs.cache
+A:\Code\Raft Modding\ExampleMod\bin\Debug\Assembly-CSharp.dll
+A:\Code\Raft Modding\ExampleMod\bin\Debug\coremod.dll
+A:\Code\Raft Modding\ExampleMod\bin\Debug\UnityEngine.dll
+A:\Code\Raft Modding\ExampleMod\bin\Debug\NoMorePeck.dll
+A:\Code\Raft Modding\ExampleMod\bin\Debug\NoMorePeck.pdb
+A:\Code\Raft Modding\ExampleMod\obj\Debug\NoMorePeck.dll
+A:\Code\Raft Modding\ExampleMod\obj\Debug\NoMorePeck.pdb

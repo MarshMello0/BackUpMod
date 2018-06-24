@@ -1,0 +1,18 @@
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\bin\Debug\MouseFix.dll
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\bin\Debug\MouseFix.pdb
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\bin\Debug\Assembly-CSharp.dll
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\bin\Debug\coremod.dll
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\bin\Debug\UnityEngine.dll
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\obj\Debug\MouseFix.csprojResolveAssemblyReference.cache
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\obj\Debug\MouseFix.csproj.CoreCompileInputs.cache
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\obj\Debug\MouseFix.dll
+A:\Code\Raft Modding\Fix Mouse Movement\ExampleMod\obj\Debug\MouseFix.pdb
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\obj\Debug\MouseFix.csprojResolveAssemblyReference.cache
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\obj\Debug\MouseFix.csproj.CoreCompileInputs.cache
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\bin\Debug\Assembly-CSharp.dll
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\bin\Debug\coremod.dll
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\bin\Debug\UnityEngine.dll
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\bin\Debug\MouseFix.dll
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\bin\Debug\MouseFix.pdb
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\obj\Debug\MouseFix.dll
+A:\Code\Raft Modding\Mouse Fix\ExampleMod\obj\Debug\MouseFix.pdb
