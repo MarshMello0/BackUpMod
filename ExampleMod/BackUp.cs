@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
-using Harmony;
 using System.Reflection;
 using System.Linq;
 using System.IO;
@@ -12,11 +9,7 @@ using Steamworks;
 
 public class BackUp : Mod
 {
-    public BackUp() : base("BackUp", "A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.", "1.2", "1.02")
-    {
-        var harmony = HarmonyInstance.Create("com.raft.marshmello.ObjectReplace");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
-    }
+    public BackUp() : base("BackUp", "A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.", "1.2.1", "1.02") { }
 
     int timeWait = 300; //This is in seconds and the default(300) is 5 minutes
     bool idSet; //if they have set the ID in the config file yet or not
