@@ -9,42 +9,53 @@ using Steamworks;
 
 public class BackUp : Mod
 {
-    public BackUp() : base("BackUp", "A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.", "1.2.1", "1.02") { }
+    public BackUp() : base("BackUp", "A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.", "1.2.2", "1.02") { }
 
     int timeWait = 300; //This is in seconds and the default(300) is 5 minutes
-    bool idSet; //if they have set the ID in the config file yet or not
     ulong usersID;
     bool worldLoaded = false;
-    public string worldName;
+    private string worldsPath;
+    private string modsPath = "mods/BackUpMod";
+    private string configPath = "mods/BackUpMod/config.txt";
 
-    void Start()
+    void Start()//This runs at the start
     {
-        CreateCommands();
-        CheckBaseFiles();
-        StartCoroutine(Timer());
+        CreateCommands();//Sets up the commands
+        CheckBaseFiles();//Checks the users files
+    }
+
+    void Update()//This update runs every tick and checks if the player is in a world
+    {
+        if (SceneManager.GetActiveScene().name == "MainScene" && !worldLoaded)
+        {
+            worldLoaded = true;
+            StartCoroutine(Timer());//Starts off the timer
+        }
+        else if (SceneManager.GetActiveScene().name != "MainScene" && worldLoaded)
+        {
+            worldLoaded = false;
+        }
     }
 
     void CheckBaseFiles()
     {
-        if (!Directory.Exists("mods/BackUpMod"))
+        if (!Directory.Exists(modsPath))//Checks if the main folder exists
         {
             Log("BackUp Mod: Base folder was missing so I created a new one");
-            Directory.CreateDirectory("mods/BackUpMod");
+            Directory.CreateDirectory(modsPath);
         }
-        if (File.Exists("mods/BackUpMod/config.txt"))
+        if (File.Exists(configPath))//Checks if the config file exists
         {
-            StreamReader reader = new StreamReader("mods/BackUpMod/config.txt");
+            StreamReader reader = new StreamReader(configPath);
             string id = reader.ReadLine();
             ulong result;
             if (ulong.TryParse(id, out result))
             {
                 usersID = result;
-                idSet = true;
             }
             else
             {
                 Log("BackUp Mod: Error loading config.txt on line 1, going to re find your ID");
-                idSet = false;
                 FindID();
             }
 
@@ -58,8 +69,10 @@ public class BackUp : Mod
             {
                 Log("BackUp Mod: Error loading config.txt on line 2, set to default");
             }
+
             reader.Close();
             Log("BackUp Mod: Loaded Config.txt");
+            worldsPath = GetWorldsPath();
         }
         else
         {
@@ -67,90 +80,206 @@ public class BackUp : Mod
         }
     }
 
-    private void CreateCommands()
+    private void FindID()//Thanks to TeKGameR for this 
     {
-        RConsole.registerCommand("backup", "Use backup help for help about BackUp", "backup", CheckCommand);
+        Semih_Network network = FindObjectOfType<Semih_Network>();
+        FieldInfo field = Enumerable.FirstOrDefault<FieldInfo>(typeof(Semih_Network).GetFields((BindingFlags)36), (FieldInfo x) => x.Name == "localSteamID");
+        CSteamID steamid = (CSteamID)field.GetValue(network);
+        usersID = steamid.m_SteamID;
+
+        Log("Backup Mod:ID was found and set!");
+        UpdateConfigFile();
+        worldsPath = GetWorldsPath();
+    }//This finds the users steam ID
+
+    private void CreateCommands()//Creates the commands
+    {
+        RConsole.registerCommand("backup", "Use backup help for help about BackUp", "backup", CheckCommands);
         
     }
 
-    private void CheckCommand()
+    private string GetWorldsPath()//This returns the location of the worlds in the Appdata folder
     {
-        string lastCommand = RConsole.lastCommands.LastOrDefault();
+        return Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World";
+    }
 
-        if (lastCommand.Split(' ').Length > 1)
+    private void CheckCommands()//This is where it checks which command was called
+    {
+        string[] lastCommand = RConsole.lastCommands.LastOrDefault().Split(' ');//stores all the last commands in an array
+
+        string caseSwitch = lastCommand[1];//Checks the first one only
+
+        switch(caseSwitch)//send the rest of the commands to functions
         {
-            if (lastCommand.Split(' ')[0] == "backup")
+            case "help":
+                Help();
+                break;
+            case "time":
+                SetTime(lastCommand);
+                break;
+            case "now":
+                BackUpNow();
+                break;
+            case "revert":
+                RevertWorld(lastCommand);
+                break;                
+        }
+
+    }
+
+    private void SetTime(string[] args)//sets the wait time
+    {
+        if (args.Length >= 2)
+        {
+            string amount = args[2];
+            int result;
+            if (int.TryParse(amount, out result))
             {
-                if (lastCommand.Split(' ')[1] == "help")
-                {
-                    Help();
-                }
-                else if (lastCommand.Split(' ')[1] == "time")
-                {
-                    if (lastCommand.Split(' ').Length >= 2)
-                    {
-                        string amount = lastCommand.Split(' ')[2];
-                        int result;
-                        if (int.TryParse(amount, out result))
-                        {
-                            SetTime(result);
-                        }
-                    }
-                    else
-                    {
-                        Log("Error");
-                        Log("backup time TimePerBackUpInSeconds");
-                    }
-                    
-                }
-                else if (lastCommand.Split(' ')[1] == "now")
-                {
-                    BackupSave();
-                }
-                else if (lastCommand.Split(' ')[1] == "revert")
-                {
-                    if (lastCommand.Split(' ').Length > 2)
-                    {
-                        if (lastCommand.Split(' ').Length == 3)
-                        {
-                            LoadFromBackup(lastCommand.Split(' ')[2]);
-                        }
-                        else
-                        {
-                            string revertWorldName = lastCommand.Split(' ')[2];
-                            for (int i = 0; i < lastCommand.Split(' ').Length - 3; i++)
-                            {
-                                Log(i + lastCommand.Split(' ')[i + 3]);
-                                revertWorldName = revertWorldName + " " + lastCommand.Split(' ')[i + 3];
-                                Log(revertWorldName);
-                                Log(lastCommand.Split(' ').Length - 4 + "");
-                                if (i == lastCommand.Split(' ').Length - 4)//This should be the end of the world name
-                                {
-                                    Log("reverting");
-                                    LoadFromBackup(revertWorldName);
-                                }
-                            }
-                        }
-
-                    }
-
-                    if (lastCommand.Split(' ').Length == 2)
-                    {
-                        Log("Error - revert takes 1 extras");
-                        Log("backup revert worldname");
-                    }
-                }
-                else
-                {
-                    Log("Unknow Command");
-                    Log("Try 'backup help' for a list of commands");
-                }
-
+                timeWait = result;
+                Log("BackUp Mod: The time between each backup has changed to " + timeWait);
+                UpdateConfigFile();
             }
+        }
+        else
+        {
+            Log("Error");
+            Log("backup time TimePerBackUpInSeconds");
         }
     }
 
-    private void Help()
+    private void BackUpNow()//Backs up the world
+    {
+        if (!worldLoaded)
+        {
+            Log("BackUp Mod: Please be in a world before you backup");
+            return;//Not to backup if in main menu
+        }
+
+        Log("BackUp Mod: Backing Up");
+        try
+        {
+            if (!Directory.Exists(modsPath))
+            {
+                Directory.CreateDirectory(modsPath);
+            }
+
+            if (File.Exists(modsPath + "/" + WorldName() + ".rgd"))//If its already saved, we are deleting it to override it
+            {
+                File.Delete(modsPath + "/" + WorldName() + ".rgd");
+            }
+
+            UnityEngine.Object.FindObjectOfType<PauseMenu>().SaveGame();//Save to the file first
+
+            File.Copy(worldsPath + "/" + WorldName() + ".rgd", modsPath + "/" + WorldName() + ".rgd");
+
+        }
+        catch (Exception e)
+        {
+            Log(e.ToString());
+        }
+        Log("BackUp Mod: Finishd Backing up");
+    }
+
+    private void RevertWorld(string[] args)//This first checks if the args they put at the end are correct for revert
+    {
+        if (args.Length > 2)
+        {
+            if (args.Length == 3)
+            {
+                LoadFromBackup(args[2]);
+            }
+            else
+            {
+                string revertWorldName = args[2];
+                for (int i = 0; i < args.Length - 3; i++)
+                {
+                    revertWorldName = revertWorldName + " " + args[i + 3];
+                    if (i == args.Length - 4)
+                    {
+                        LoadFromBackup(revertWorldName);//If they are it will move the world file
+                    }
+                }
+            }
+
+        }
+
+        if (args.Length == 2)
+        {
+            Log("Error - revert takes 1 extras");
+            Log("backup revert worldname");
+        }
+    }
+
+    private void LoadFromBackup(string name)//Moves the backup file into the worlds folder in appdata
+    {
+        if (worldLoaded)
+        {
+            Log("Please return to the main menu to revert a world.");
+            return;
+        }
+
+        if (!File.Exists(modsPath + "/" + name + ".rgd"))
+        {
+            Log("BackUp Mod: Can't seem to find any backups for that world, Sorry");
+            return;
+        }
+        else
+        {
+            Log("Reverting world called " + name);
+
+            try
+            {
+                File.Delete(worldsPath + "/" + name + ".rgd");
+            }
+            catch (Exception e)
+            {
+                Log("BackUp Mod: Tried to delete old world, but there was an error, revert stopped");
+                Log(e.ToString());
+                return;
+            }
+
+            try
+            {
+                File.Move("mods/BackUpMod/" + name + ".rgd", worldsPath + "/" + name + ".rgd");
+            }
+            catch (Exception e)
+            {
+                Log("BackUp Mod: Tried to move backup world, but there was an error, revert stopped");
+                Log(e.ToString());
+                return;
+            }
+
+            Log("BackUp Mod: Revert Completed");
+        }
+    }
+
+
+    void UpdateConfigFile()//Updates the config file which has usersID and timewait
+    {
+        if (File.Exists(configPath)) File.Delete(configPath);
+
+        StreamWriter writer = new StreamWriter(configPath);
+
+        writer.WriteLine(usersID);
+        writer.WriteLine(timeWait);
+        writer.Close();
+
+        Log("BackUp Mod: Updated Config.txt");
+    }
+
+    private void Log(string text)//Just an easier function to call instead of RConsole.Log
+    {
+        try
+        {
+            RConsole.Log(text);
+        }
+        catch (Exception e)
+        {
+            RConsole.Log(e.ToString());
+        }
+    }
+
+    private void Help()//Displays all of the commands when backup help is called
     {
         Log("<align=center><size=200%> Backup Mod Help </size> </align>");
         Log("<align=center><size=150%>All commands<b><u> must </u></b>start with backup </size> </align>");
@@ -168,175 +297,18 @@ public class BackUp : Mod
         Log("revert worldName, this is how you revert to a backup you must be in the main menu to use it");
     }
 
-    private void FindID()//Thanks to TeKGameR for this
+    private string WorldName()//returns the worldname when its needed
     {
-        Semih_Network network = FindObjectOfType<Semih_Network>();
-        FieldInfo field = Enumerable.FirstOrDefault<FieldInfo>(typeof(Semih_Network).GetFields((BindingFlags)36), (FieldInfo x) => x.Name == "localSteamID");
-        CSteamID steamid = (CSteamID)field.GetValue(network);
-        usersID = steamid.m_SteamID;
-        idSet = true;
-
-        Log("Backup Mod:ID was found and set!");
-        UpdateConfigFile();
+        return SaveAndLoad.CurrentGameFileName;
     }
 
-    private void SetTime(int time)
-    {
-        if (idSet)
-        {
-            timeWait = time;
-            Log("BackUp Mod: The time between each backup has changed to " + timeWait);
-            UpdateConfigFile();
-        }
-        else
-        {
-            NotSetUpID();
-        }
-
-    }
-
-    private void BackupSave()
-    {
-        if (!worldLoaded)
-        {
-            Log("BackUp Mod: Please be in a world before you backup");
-            return;//Not to backup if in main menu
-        }
-        UpdateWorldName();
-        Log("BackUp Mod: Backing Up");
-        try
-        {
-            if (!Directory.Exists("mods/BackUpMod"))
-            {
-                Directory.CreateDirectory("mods/BackUpMod");
-            }
-
-            if (File.Exists("mods/BackUpMod/" + worldName + ".rgd"))//If its already saved, we are deleting it to override it
-            {
-                File.Delete("mods/BackUpMod/" + worldName + ".rgd");
-            }
-
-            UnityEngine.Object.FindObjectOfType<PauseMenu>().SaveGame();//Save to the file first
-
-            File.Copy(Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + worldName + ".rgd", "mods/BackUpMod/" + worldName + ".rgd");
-
-        }
-        catch (Exception e)
-        {
-            Log(e.ToString());
-        }
-        Log("BackUp Mod: Finishd Backing up");
-    }
-
-    private IEnumerator Timer()
+    private IEnumerator Timer()//The timer which triggers the backup
     {
         yield return new WaitForSeconds(timeWait);
-        if (idSet)
+        if (worldLoaded)//the timer will only continue if the user is in a world
         {
-            BackupSave();
-        }
-        StartCoroutine(Timer());
-        
-    }
-
-    void NotSetUpID()
-    {
-        Log("ID seemed to be missing, researching");
-        FindID();
-    }
-    
-    public void Log(string text)
-    {
-        try
-        {
-            RConsole.Log(text);
-        }
-        catch (Exception e)
-        {
-            RConsole.Log(e.ToString());
-        }
-        
-    }
-
-    private void UpdateWorldName()
-    {
-        worldName = SaveAndLoad.CurrentGameFileName;
-    }
-
-    void UpdateConfigFile()
-    {
-        UpdateWorldName();
-
-        if (File.Exists("mods/BackUpMod/config.txt")) File.Delete("mods/BackUpMod/config.txt");
-
-        StreamWriter writer = new StreamWriter("mods/BackUpMod/config.txt");
-
-        writer.WriteLine(usersID);
-        writer.WriteLine(timeWait);
-        writer.Close();
-
-        Log("BackUp Mod: Updated Config.txt");
-    }
-    
-    void Update()
-    {
-        if (SceneManager.GetActiveScene().name == "MainScene" && !worldLoaded)
-        {
-            worldLoaded = true;
-        }
-        else if (SceneManager.GetActiveScene().name != "MainScene" && worldLoaded)
-        {
-            worldLoaded = false;
-        }
-    }
-
-
-    private void LoadFromBackup(string name)
-    {
-        if (!idSet)//If their ID is not set yet, tell them to set it
-        {
-            NotSetUpID();
-            return;
-        }
-
-        if (worldLoaded)
-        {
-            Log("Please return to the main menu to revert a world.");
-            return;
-        }
-
-        if (!File.Exists("mods/BackUpMod/" + name + ".rgd"))
-        {
-            Log("BackUp Mod: Can't seem to find any backups for that world, Sorry");
-            return;
-        }
-        else
-        {
-            Log("Reverting world called " + name);
-
-            try
-            {
-                File.Delete(Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + name + ".rgd");
-            }
-            catch (Exception e)
-            {
-                Log("BackUp Mod: Tried to delete old world, but there was an error, revert stopped");
-                Log(e.ToString());
-                return;
-            }
-
-            try
-            {
-                File.Move("mods/BackUpMod/" + name + ".rgd", Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + name + ".rgd");
-            }
-            catch (Exception e)
-            {
-                Log("BackUp Mod: Tried to move backup world, but there was an error, revert stopped");
-                Log(e.ToString());
-                return;
-            }
-
-            Log("BackUp Mod: Revert Completed");
+            BackUpNow();
+            StartCoroutine(Timer());
         }
     }
 }
