@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 public class BackUp : Mod
 {
-    public BackUp() : base("BackUp", "BackUp", "0.5", "1.01B")
+    public BackUp() : base("BackUp", "A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.", "1.0", "1.02")
     {
         var harmony = HarmonyInstance.Create("com.raft.marshmello.ObjectReplace");
         harmony.PatchAll(Assembly.GetExecutingAssembly());
@@ -124,7 +124,7 @@ public class BackUp : Mod
                     else
                     {
                         Log("Error");
-                        Log("");
+                        Log("backup time TimePerBackUpInSeconds");
                     }
                     
                 }
@@ -163,20 +163,33 @@ public class BackUp : Mod
                     }
                     else
                     {
-                        Log("Error");
-                        Log("Please put a valid id");
+                        Log("Error - ID takes another number");
+                        Log("backup id steamID64");
                     }
                 }
                 else if (lastCommand.Split(' ')[1] == "now")
                 {
-                    if (lastCommand.Split(' ').Length >= 2)
+                    BackupSave(backupNumber);
+                }
+                else if (lastCommand.Split(' ')[1] == "revert")
+                {
+                    if (lastCommand.Split(' ').Length >= 3)
                     {
-                        BackupSave(int.Parse(lastCommand.Split(' ')[2].ToString()));
+                        string worldnumber = lastCommand.Split(' ')[3];
+                        int result;
+                        if (int.TryParse(worldnumber,out result))
+                        {
+                            LoadFromBackup(lastCommand.Split(' ')[2], result);
+                        }
+                        else
+                        {
+                            Log("Error - Please enter a valid world number");
+                        }
                     }
                     else
                     {
-                        Log("Error");
-                        Log("Please put a valid id");
+                        Log("Error - revert takes 2 extras");
+                        Log("backup revert worldname backupnumber");
                     }
                 }
                 else
@@ -206,6 +219,12 @@ public class BackUp : Mod
         Log("");
         Log("help");
         Log("help displays this help messages");
+        Log("");
+        Log("now");
+        Log("now, now performs a backup");
+        Log("");
+        Log("revert");
+        Log("revert worldName backupNumber, this is how you revert to a backup you must be in any world to use it");
 
     }
 
@@ -276,6 +295,12 @@ public class BackUp : Mod
 
             File.Copy(Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + worldName + ".rgd", "mods/BackUpMod/" + worldName + "/" + worldName + "_" + backupNumber + ".rgd");
 
+            this.backupNumber++;
+            if (this.backupNumber > amountOfBackups)
+            {
+                this.backupNumber = 0;
+            }
+
         }
         catch (Exception e)
         {
@@ -345,6 +370,41 @@ public class BackUp : Mod
         {
             worldLoaded = false;
         }
+    }
+
+
+    private void LoadFromBackup(string name, int worldNumber)
+    {
+        if (!idSet)//If their ID is not set yet, tell them to set it
+        {
+            NotSetUpID();
+            return;
+        }
+
+        if (!worldLoaded)//If they are not in a world, tell them to be in a world because its an easy way to update the world list
+        {
+            Log("Please load into any world, this is so that it can update the world list");
+            //return;
+        }
+
+        if (File.Exists("mods/BackUpMod/" + name + "/" + name + "_" + worldNumber + ".rgd"))
+        {
+            try
+            {
+                File.Copy("mods/BackUpMod/" + name + "/" + name + "_" + worldNumber + ".rgd", Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + name + ".rgd");
+            }
+            catch (Exception e)
+            {
+                Log("Error when copying backup");
+                Log(e.ToString());
+            }
+            
+        }
+        else
+        {
+            Log("Can't find the world backup called " + name + "_" + worldNumber + ".rgd");
+        }
+
     }
 
 
