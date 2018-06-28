@@ -12,15 +12,13 @@ using Steamworks;
 
 public class BackUp : Mod
 {
-    public BackUp() : base("BackUp", "A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.", "1.0", "1.02")
+    public BackUp() : base("BackUp", "A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.", "1.2", "1.02")
     {
         var harmony = HarmonyInstance.Create("com.raft.marshmello.ObjectReplace");
         harmony.PatchAll(Assembly.GetExecutingAssembly());
     }
 
     int timeWait = 300; //This is in seconds and the default(300) is 5 minutes
-    int amountOfBackups = 5; //This is just how many back up that it will save before it starts over riding them
-    int backupNumber = 1;
     bool idSet; //if they have set the ID in the config file yet or not
     ulong usersID;
     bool worldLoaded = false;
@@ -67,28 +65,6 @@ public class BackUp : Mod
             {
                 Log("BackUp Mod: Error loading config.txt on line 2, set to default");
             }
-
-            string amountOfBackupsString = reader.ReadLine();
-            int result3;
-            if (int.TryParse(amountOfBackupsString, out result3))
-            {
-                amountOfBackups = result3;
-            }
-            else
-            {
-                Log("BackUp Mod: Error loading config.txt on line 3, set to default");
-            }
-
-            string backupNumberString = reader.ReadLine();
-            int result4;
-            if (int.TryParse(backupNumberString, out result4))
-            {
-                backupNumber = result4;
-            }
-            else
-            {
-                Log("BackUp Mod: Error loading config.txt on line 4, set to default");
-            }
             reader.Close();
             Log("BackUp Mod: Loaded Config.txt");
         }
@@ -134,46 +110,41 @@ public class BackUp : Mod
                     }
                     
                 }
-                else if (lastCommand.Split(' ')[1] == "amount")
-                {
-                    if (lastCommand.Split(' ').Length >= 2)
-                    {
-                        string amount = lastCommand.Split(' ')[2];
-                        int result;
-                        if (int.TryParse(amount, out result))
-                        {
-                            SetAmount(result);
-                        }
-                    }
-                    else
-                    {
-                        Log("Error");
-                        Log("");
-                    }
-                }
                 else if (lastCommand.Split(' ')[1] == "now")
                 {
-                    BackupSave(backupNumber);
+                    BackupSave();
                 }
                 else if (lastCommand.Split(' ')[1] == "revert")
                 {
-                    if (lastCommand.Split(' ').Length >= 3)
+                    if (lastCommand.Split(' ').Length > 2)
                     {
-                        string worldnumber = lastCommand.Split(' ')[3];
-                        int result;
-                        if (int.TryParse(worldnumber,out result))
+                        if (lastCommand.Split(' ').Length == 3)
                         {
-                            LoadFromBackup(lastCommand.Split(' ')[2], result);
+                            LoadFromBackup(lastCommand.Split(' ')[2]);
                         }
                         else
                         {
-                            Log("Error - Please enter a valid world number");
+                            string revertWorldName = lastCommand.Split(' ')[2];
+                            for (int i = 0; i < lastCommand.Split(' ').Length - 3; i++)
+                            {
+                                Log(i + lastCommand.Split(' ')[i + 3]);
+                                revertWorldName = revertWorldName + " " + lastCommand.Split(' ')[i + 3];
+                                Log(revertWorldName);
+                                Log(lastCommand.Split(' ').Length - 4 + "");
+                                if (i == lastCommand.Split(' ').Length - 4)//This should be the end of the world name
+                                {
+                                    Log("reverting");
+                                    LoadFromBackup(revertWorldName);
+                                }
+                            }
                         }
+
                     }
-                    else
+
+                    if (lastCommand.Split(' ').Length == 2)
                     {
-                        Log("Error - revert takes 2 extras");
-                        Log("backup revert worldname backupnumber");
+                        Log("Error - revert takes 1 extras");
+                        Log("backup revert worldname");
                     }
                 }
                 else
@@ -194,9 +165,6 @@ public class BackUp : Mod
         Log("time");
         Log("time TimeToWaitInSeconds, time is to set a custom time when every backup is made, by default it is every 5 minutes");
         Log("");
-        Log("amount");
-        Log("amount HowManyBackups, amount is how many back ups you want it to make before it starts overriding the old ones, default it 5.");
-        Log("");
         Log("help");
         Log("help displays this help messages");
         Log("");
@@ -204,11 +172,10 @@ public class BackUp : Mod
         Log("now, now performs a backup");
         Log("");
         Log("revert");
-        Log("revert worldName backupNumber, this is how you revert to a backup you must be in any world to use it");
-
+        Log("revert worldName, this is how you revert to a backup you must be in the main menu to use it");
     }
 
-    private void FindID()
+    private void FindID()//Thanks to TeKGameR for this
     {
         Semih_Network network = FindObjectOfType<Semih_Network>();
         FieldInfo field = Enumerable.FirstOrDefault<FieldInfo>(typeof(Semih_Network).GetFields((BindingFlags)36), (FieldInfo x) => x.Name == "localSteamID");
@@ -234,47 +201,31 @@ public class BackUp : Mod
         }
 
     }
-    private void SetAmount(int amount)
-    {
-        if (idSet)
-        {
-            amountOfBackups = amount;
-            Log("BackUp Mod: Number of backups has changed to " + amountOfBackups);
-            UpdateConfigFile();
-        }
-        else
-        {
-            NotSetUpID();
-        }
 
-    }
-
-    private void BackupSave(int backupNumber)
+    private void BackupSave()
     {
-        if (!worldLoaded) return;//Not to backup if in main menu
+        if (!worldLoaded)
+        {
+            Log("BackUp Mod: Please be in a world before you backup");
+            return;//Not to backup if in main menu
+        }
         UpdateWorldName();
         Log("BackUp Mod: Backing Up");
         try
         {
-            if (!Directory.Exists("mods/BackUpMod/" + worldName))
+            if (!Directory.Exists("mods/BackUpMod"))
             {
-                Directory.CreateDirectory("mods/BackUpMod/" + worldName);
+                Directory.CreateDirectory("mods/BackUpMod");
             }
 
-            if (File.Exists("mods/BackUpMod/" + worldName + "/" + worldName + "_" + backupNumber + ".rgd"))//If its already saved, we are deleting it to override it
+            if (File.Exists("mods/BackUpMod/" + worldName + ".rgd"))//If its already saved, we are deleting it to override it
             {
-                File.Delete("mods/BackUpMod/" + worldName + "/" + worldName + "_" + backupNumber + ".rgd");
+                File.Delete("mods/BackUpMod/" + worldName + ".rgd");
             }
 
             UnityEngine.Object.FindObjectOfType<PauseMenu>().SaveGame();//Save to the file first
 
-            File.Copy(Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + worldName + ".rgd", "mods/BackUpMod/" + worldName + "/" + worldName + "_" + backupNumber + ".rgd");
-
-            this.backupNumber++;
-            if (this.backupNumber > amountOfBackups)
-            {
-                this.backupNumber = 0;
-            }
+            File.Copy(Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + worldName + ".rgd", "mods/BackUpMod/" + worldName + ".rgd");
 
         }
         catch (Exception e)
@@ -289,7 +240,7 @@ public class BackUp : Mod
         yield return new WaitForSeconds(timeWait);
         if (idSet)
         {
-            BackupSave(backupNumber);
+            BackupSave();
         }
         StartCoroutine(Timer());
         
@@ -329,13 +280,11 @@ public class BackUp : Mod
 
         writer.WriteLine(usersID);
         writer.WriteLine(timeWait);
-        writer.WriteLine(amountOfBackups);
-        writer.WriteLine(backupNumber);
         writer.Close();
 
         Log("BackUp Mod: Updated Config.txt");
     }
-
+    
     void Update()
     {
         if (SceneManager.GetActiveScene().name == "MainScene" && !worldLoaded)
@@ -349,7 +298,7 @@ public class BackUp : Mod
     }
 
 
-    private void LoadFromBackup(string name, int worldNumber)
+    private void LoadFromBackup(string name)
     {
         if (!idSet)//If their ID is not set yet, tell them to set it
         {
@@ -357,31 +306,44 @@ public class BackUp : Mod
             return;
         }
 
-        if (!worldLoaded)//If they are not in a world, tell them to be in a world because its an easy way to update the world list
+        if (worldLoaded)
         {
-            Log("Please load into any world, this is so that it can update the world list");
-            //return;
+            Log("Please return to the main menu to revert a world.");
+            return;
         }
 
-        if (File.Exists("mods/BackUpMod/" + name + "/" + name + "_" + worldNumber + ".rgd"))
+        if (!File.Exists("mods/BackUpMod/" + name + ".rgd"))
         {
-            try
-            {
-                File.Copy("mods/BackUpMod/" + name + "/" + name + "_" + worldNumber + ".rgd", Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + name + "_" + worldNumber + ".rgd");
-            }
-            catch (Exception e)
-            {
-                Log("Error when copying backup");
-                Log(e.ToString());
-            }
-            
+            Log("BackUp Mod: Can't seem to find any backups for that world, Sorry");
+            return;
         }
         else
         {
-            Log("Can't find the world backup called " + name + "_" + worldNumber + ".rgd");
+            Log("Reverting world called " + name);
+
+            try
+            {
+                File.Delete(Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + name + ".rgd");
+            }
+            catch (Exception e)
+            {
+                Log("BackUp Mod: Tried to delete old world, but there was an error, revert stopped");
+                Log(e.ToString());
+                return;
+            }
+
+            try
+            {
+                File.Move("mods/BackUpMod/" + name + ".rgd", Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + name + ".rgd");
+            }
+            catch (Exception e)
+            {
+                Log("BackUp Mod: Tried to move backup world, but there was an error, revert stopped");
+                Log(e.ToString());
+                return;
+            }
+
+            Log("BackUp Mod: Revert Completed");
         }
-
     }
-
-
 }
