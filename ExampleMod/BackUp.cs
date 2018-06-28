@@ -8,6 +8,7 @@ using System.Linq;
 using System.IO;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using Steamworks;
 
 public class BackUp : Mod
 {
@@ -21,7 +22,7 @@ public class BackUp : Mod
     int amountOfBackups = 5; //This is just how many back up that it will save before it starts over riding them
     int backupNumber = 1;
     bool idSet; //if they have set the ID in the config file yet or not
-    Int64 usersID;
+    ulong usersID;
     bool worldLoaded = false;
     public string worldName;
 
@@ -43,16 +44,17 @@ public class BackUp : Mod
         {
             StreamReader reader = new StreamReader("mods/BackUpMod/config.txt");
             string id = reader.ReadLine();
-            Int64 result;
-            if (Int64.TryParse(id, out result))
+            ulong result;
+            if (ulong.TryParse(id, out result))
             {
                 usersID = result;
                 idSet = true;
             }
             else
             {
-                Log("BackUp Mod: Error loading config.txt on line 1, please re enter your ID");
+                Log("BackUp Mod: Error loading config.txt on line 1, going to re find your ID");
                 idSet = false;
+                FindID();
             }
 
             string waitTimeString = reader.ReadLine();
@@ -89,6 +91,10 @@ public class BackUp : Mod
             }
             reader.Close();
             Log("BackUp Mod: Loaded Config.txt");
+        }
+        else
+        {
+            FindID();
         }
     }
 
@@ -145,28 +151,6 @@ public class BackUp : Mod
                         Log("");
                     }
                 }
-                else if (lastCommand.Split(' ')[1] == "id")
-                {
-                    if (lastCommand.Split(' ').Length >= 2)
-                    {
-                        string amount = lastCommand.Split(' ')[2];
-                        Int64 result;
-                        if (Int64.TryParse(amount, out result))
-                        {
-                            SetupID(result);
-                        }
-                        else
-                        {
-                            Log("Error");
-                            Log("Please put a valid id");
-                        }
-                    }
-                    else
-                    {
-                        Log("Error - ID takes another number");
-                        Log("backup id steamID64");
-                    }
-                }
                 else if (lastCommand.Split(' ')[1] == "now")
                 {
                     BackupSave(backupNumber);
@@ -206,10 +190,6 @@ public class BackUp : Mod
     {
         Log("<align=center><size=200%> Backup Mod Help </size> </align>");
         Log("<align=center><size=150%>All commands<b><u> must </u></b>start with backup </size> </align>");
-        Log("");
-        Log("id");
-        Log("id YourSteamID, id is one of the first commands you must do to step up the mod");
-        Log("You have to put your steam ID after it so that it can find your world save"); 
         Log(" ");
         Log("time");
         Log("time TimeToWaitInSeconds, time is to set a custom time when every backup is made, by default it is every 5 minutes");
@@ -228,23 +208,18 @@ public class BackUp : Mod
 
     }
 
-    private void SetupID(Int64 id)
+    private void FindID()
     {
-        Log(id.ToString());
-        try
-        {
-            CheckBaseFiles();//Just incase some person said, LET DELETE THESE FILES AND BREAK THE MOD
-            usersID = id;
-            idSet = true;//They have set the id up
-            UpdateConfigFile();
-            Log("BackUp Mod: ID is now set to " + usersID);
-        }
-        catch (Exception e)
-        {
-            Log("BackUp Mod: Error ");
-            Log(e.ToString());
-        }
+        Semih_Network network = FindObjectOfType<Semih_Network>();
+        FieldInfo field = Enumerable.FirstOrDefault<FieldInfo>(typeof(Semih_Network).GetFields((BindingFlags)36), (FieldInfo x) => x.Name == "localSteamID");
+        CSteamID steamid = (CSteamID)field.GetValue(network);
+        usersID = steamid.m_SteamID;
+        idSet = true;
+
+        Log("Backup Mod:ID was found and set!");
+        UpdateConfigFile();
     }
+
     private void SetTime(int time)
     {
         if (idSet)
@@ -322,7 +297,8 @@ public class BackUp : Mod
 
     void NotSetUpID()
     {
-        Log("Please set up your steam ID first with 'backup id steamIDNumber' ");
+        Log("ID seemed to be missing, researching");
+        FindID();
     }
     
     public void Log(string text)
@@ -391,7 +367,7 @@ public class BackUp : Mod
         {
             try
             {
-                File.Copy("mods/BackUpMod/" + name + "/" + name + "_" + worldNumber + ".rgd", Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + name + ".rgd");
+                File.Copy("mods/BackUpMod/" + name + "/" + name + "_" + worldNumber + ".rgd", Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)) + "/LocalLow/Redbeet Interactive/Raft/User/User_" + usersID + "/World/" + name + "_" + worldNumber + ".rgd");
             }
             catch (Exception e)
             {

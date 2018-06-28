@@ -42,13 +42,41 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\DLLS\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\DLLS\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="coremod">
-      <HintPath>..\coremod.dll</HintPath>
+      <HintPath>..\..\DLLS\coremod.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>..\..\DLLS\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="NestedPrefabs">
+      <HintPath>..\..\DLLS\NestedPrefabs.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.OdinInspector.Attributes">
+      <HintPath>..\..\DLLS\Sirenix.OdinInspector.Attributes.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="TextMeshPro-2017.1-1.0.56-Runtime">
+      <HintPath>..\..\DLLS\TextMeshPro-2017.1-1.0.56-Runtime.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\UnityEngine.dll</HintPath>
+      <HintPath>..\..\DLLS\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Analytics">
+      <HintPath>..\..\DLLS\UnityEngine.Analytics.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>..\..\DLLS\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Timeline">
+      <HintPath>..\..\DLLS\UnityEngine.Timeline.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\DLLS\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

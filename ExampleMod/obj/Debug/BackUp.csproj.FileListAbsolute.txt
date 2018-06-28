@@ -7,3 +7,12 @@ D:\Code\Raft Modding\BackUpMod\ExampleMod\obj\Debug\BackUp.csprojResolveAssembly
 D:\Code\Raft Modding\BackUpMod\ExampleMod\obj\Debug\BackUp.csproj.CoreCompileInputs.cache
 D:\Code\Raft Modding\BackUpMod\ExampleMod\obj\Debug\BackUp.dll
 D:\Code\Raft Modding\BackUpMod\ExampleMod\obj\Debug\BackUp.pdb
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\Assembly-CSharp-firstpass.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\Mono.Security.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\NestedPrefabs.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\Sirenix.OdinInspector.Attributes.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\TextMeshPro-2017.1-1.0.56-Runtime.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.Analytics.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.Networking.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.Timeline.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.UI.dll
