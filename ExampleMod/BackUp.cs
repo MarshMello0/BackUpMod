@@ -7,10 +7,13 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 using Steamworks;
 
+[ModTitle("BackUp")]
+[ModDescription("A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.")]
+[ModAuthor(". Marsh.Mello .")]
+[ModVersion("1.2.3")]
+[RaftVersion("1.03B")]
 public class BackUp : Mod
 {
-    public BackUp() : base("BackUp", "A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.", "1.2.2", "1.02") { }
-
     int timeWait = 300; //This is in seconds and the default(300) is 5 minutes
     ulong usersID;
     bool worldLoaded = false;

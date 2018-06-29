@@ -16,3 +16,4 @@ D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.Analytics.dll
 D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.Networking.dll
 D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.Timeline.dll
 D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\UnityEngine.UI.dll
+D:\Code\Raft Modding\BackUpMod\ExampleMod\bin\Debug\RaftModLoader.dll
