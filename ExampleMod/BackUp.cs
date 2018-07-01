@@ -180,7 +180,7 @@ public class BackUp : Mod
         {
             Log(e.ToString());
         }
-        Log("BackUp Mod: Finishd Backing up");
+        Log("BackUp Mod: Finished Backing up");
     }
 
     private void RevertWorld(string[] args)//This first checks if the args they put at the end are correct for revert
