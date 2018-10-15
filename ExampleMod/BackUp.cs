@@ -10,8 +10,10 @@ using Steamworks;
 [ModTitle("BackUp")]
 [ModDescription("A mod which can help you create backups of your worlds and easily revert over to them if something go wrong.")]
 [ModAuthor(". Marsh.Mello .")]
-[ModVersion("1.2.3")]
-[RaftVersion("1.03B")]
+[ModIconUrl("http://2.bp.blogspot.com/-TXR-pygWT5c/V07IWNXNdbI/AAAAAAAAzPw/7oB17HmsGxAoKGaMjlhH8MxONGdHo0XhwCK4B/s1600/Material%2BBackup.png")]
+[ModWallpaperUrl("http://2.bp.blogspot.com/-TXR-pygWT5c/V07IWNXNdbI/AAAAAAAAzPw/7oB17HmsGxAoKGaMjlhH8MxONGdHo0XhwCK4B/s1600/Material%2BBackup.png")]
+[ModVersion("1.3.0")]
+[RaftVersion("Update 7 (3204058)")]
 public class BackUp : Mod
 {
     int timeWait = 300; //This is in seconds and the default(300) is 5 minutes
@@ -97,7 +99,7 @@ public class BackUp : Mod
 
     private void CreateCommands()//Creates the commands
     {
-        RConsole.registerCommand("backup", "Use backup help for help about BackUp", "backup", CheckCommands);
+        RConsole.registerCommand(typeof(BackUp), "Use backup help for help about BackUp", "backup", CheckCommands);
         
     }
 
@@ -110,6 +112,11 @@ public class BackUp : Mod
     {
         string[] lastCommand = RConsole.lastCommands.LastOrDefault().Split(' ');//stores all the last commands in an array
 
+        if (lastCommand.Length == 1)
+        {
+            Help();
+            return;
+        }
         string caseSwitch = lastCommand[1];//Checks the first one only
 
         switch(caseSwitch)//send the rest of the commands to functions
@@ -132,7 +139,7 @@ public class BackUp : Mod
 
     private void SetTime(string[] args)//sets the wait time
     {
-        if (args.Length >= 2)
+        if (args.Length >= 3)
         {
             string amount = args[2];
             int result;
@@ -171,7 +178,7 @@ public class BackUp : Mod
                 File.Delete(modsPath + "/" + WorldName() + ".rgd");
             }
 
-            UnityEngine.Object.FindObjectOfType<PauseMenu>().SaveGame();//Save to the file first
+            UnityEngine.Object.FindObjectOfType<PauseMenu>().SaveGame(true);//Save to the file first
 
             File.Copy(worldsPath + "/" + WorldName() + ".rgd", modsPath + "/" + WorldName() + ".rgd");
 
@@ -253,6 +260,7 @@ public class BackUp : Mod
             }
 
             Log("BackUp Mod: Revert Completed");
+            Log("BackUp Mod: <b> <u> YOU MUST RELAUNCH THE GAME OTHER WISE IT CRASHES </b> </u>");
         }
     }
 
